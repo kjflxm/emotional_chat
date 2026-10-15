@@ -5,7 +5,7 @@
 
 import pytest
 from unittest.mock import Mock, patch
-from datetime import datetime
+from datetime import datetime, timezone
 
 from backend.core.config import Config, get_config, Environment
 from backend.core.exceptions import (
@@ -212,6 +212,31 @@ class TestFormatters:
         # 日期格式
         date = format_timestamp(dt, "date")
         assert date == "2025-10-16"
+
+        # RFC格式
+        rfc = format_timestamp(dt, "rfc")
+        assert rfc.endswith("16 Oct 2025 14:30:00 GMT")
+
+        # Unix时间戳
+        unix = format_timestamp(dt, "unix")
+        assert unix == str(int(dt.timestamp()))
+
+        # 自定义strftime格式回退
+        custom = format_timestamp(dt, "%Y/%m/%d %H:%M")
+        assert custom == "2025/10/16 14:30"
+
+    def test_format_timestamp_date_only(self):
+        """测试date格式只返回日期部分"""
+        # 带时区的当日末尾时刻，仍应只返回当天日期
+        dt = datetime(2025, 10, 16, 23, 59, 59, tzinfo=timezone.utc)
+
+        date = format_timestamp(dt, "date")
+        assert date == "2025-10-16"
+        assert len(date) == len("YYYY-MM-DD")
+        assert ":" not in date
+
+        # 与readable格式对比，readable保留时间部分
+        assert "23:59:59" in format_timestamp(dt, "readable")
 
 
 class TestHelpers:
