@@ -142,3 +142,8 @@ python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 
+[tool.pytest.ini_options]
+# 让在仓库根直接执行 `pytest` 也能导入 backend 包
+# （pytest 的 console script 不会把当前目录加入 sys.path，`python -m pytest` 才会）
+pythonpath = ["."]
+
